@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Feedback — {{ org_user.organization_name }}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+
+        <div class="container-fluid px-4">
+
+            <a href="{% url 'org_detail' org_user.id %}"
+               class="btn btn-light fw-semibold">
+
+                ← Back to Organization Details
+
+            </a>
+
+            <span class="navbar-brand fw-bold mx-auto">
+                QeNova Feedback System
+            </span>
+
+        </div>
+
+    </nav>
+
+    <div class="container py-5">
+
+        <div class="card shadow-lg border-0 rounded-4 mx-auto"
+             style="max-width: 800px;">
+
+            <div class="card-body p-5">
+
+                <div class="text-center mb-5">
+
+                    <h1 class="fw-bold text-primary">
+                        Submit Feedback
+                    </h1>
+
+                    <p class="text-muted fs-5">
+
+                        {{ org_user.organization_name }}
+
+                    </p>
+
+                </div>
+
+                {% if messages %}
+
+                    {% for message in messages %}
+
+                        <div class="alert alert-info shadow-sm">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+                {% if feedback %}
+
+                    <div class="alert alert-warning shadow-sm mb-4">
+
+                        You are editing your existing feedback for this organization.
+
+                    </div>
+
+                {% else %}
+
+                    <div class="alert alert-primary shadow-sm mb-4">
+
+                        Tell us about your experience in the queue with this organization.
+
+                    </div>
+
+                {% endif %}
+
+                <div class="card border-0 bg-light shadow-sm">
+
+                    <div class="card-body p-4">
+
+                        <form method="post">
+
+                            {% csrf_token %}
+
+                            {{ form.as_p }}
+
+                            <div class="d-grid mt-4">
+
+                                <button type="submit"
+                                        class="btn btn-primary btn-lg fw-semibold">
+
+                                    Submit Feedback
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+
+                    <div class="alert alert-success shadow-sm mb-0">
+
+                        Your feedback helps organizations improve their queue management and customer experience.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

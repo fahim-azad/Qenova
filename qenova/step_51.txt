@@ -1,0 +1,45 @@
+<USER_REQUEST>
+🔷 App 1 — accounts
+•	User Registration
+•	User Login
+•	Organization Registration
+•	Organization Login
+•	Admin Login
+•	Logout System
+•	Forgot Password
+•	Password Reset via Email
+•	Change Password
+•	Authentication System
+•	Role-Based Access Control
+•	User Profile Management
+•	Organization Profile Management
+•	Edit Profile
+•	Upload Profile Picture
+•	View Profile Information
+•	User Dashboard
+•	Organization Dashboard Access
+•	Account Verification
+•	Session Management
+•	Remember Me Feature
+•	Secure Authentication
+•	Account Status Management
+•	Block / Unblock Users
+•	Activity Tracking
+•	Last Login Tracking
+•	Multi-Role Authentication
+•	Personalized Dashboard Access
+
+
+
+
+🔷 App 2 — queue_system
+•	Browse Organizations
+•	Search Organizations
+•	Search Services
+•	Online Queue Booking
+•	Date-Based Queue Booking
+•	Instant Token Booking
+•	Automatic Serial Number Generation
+•	Dynamic Token Assignment
+•	Real-Time Queue Tracking
+<truncated 8631 bytes>

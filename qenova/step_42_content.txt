@@ -1,0 +1,51 @@
+<USER_REQUEST>
+# 🔷 Qenova – Complete Feature List
+
+---
+
+# 🔹 User Features
+
+* Register / Login
+* Browse Organizations
+* Search Available Services
+* Book Queue (with date)
+* Track Queue Status
+* Get Real-Time Notifications
+* View Estimated Arrival Time
+* Emergency Request Submission
+* Emergency Document Upload
+* Live Queue Monitoring
+* Feedback Submission
+
+---
+
+# 🔹 Organization Features
+
+* Approve / Reject Queue Requests
+* Queue Management (Call / Skip Token)
+* Emergency Request Handling
+* Token Generation System
+* Daily Queue Reset
+* Dashboard Monitoring
+* View Waiting Users
+* Manage Queue Flow
+* View Queue Statistics
+* Set Working Hours
+
+---
+
+# 🔹 Unique Features
+
+* Smart Priority Insert
+  *(Emergency users inserted after fixed running tokens instead of front)*
+
+* Arrival Time Suggestion
+  *(Suggests best arrival time to reduce waiting)*
+
+* Queue Load Indicator
+  *(Shows low / medium / high crowd level)*
+
+* Behavior Tracking System
+  *(Detects no-show or inactive users)*
+
+<truncated 1699 bytes>

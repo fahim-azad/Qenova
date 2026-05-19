@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QeNova - Manage Emergency Priority Requests</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-danger shadow-sm">
+
+        <div class="container-fluid px-4">
+
+            <a class="navbar-brand fw-bold" href="#">
+                QeNova Organization Dashboard
+            </a>
+
+            <div class="text-white">
+                <strong>Logged in as:</strong>
+                {{ organization.account.organization_name }}
+            </div>
+
+        </div>
+
+    </nav>
+
+    <div class="container-fluid py-4 px-4">
+
+        <div class="d-flex flex-wrap gap-2 mb-4">
+
+            <a href="{% url 'org_dashboard' %}" class="btn btn-primary">
+                Main Dashboard
+            </a>
+
+            <a href="{% url 'org_emergencies' %}" class="btn btn-danger">
+                Emergency Requests
+            </a>
+
+            <a href="{% url 'org_emergency_monitoring' %}" class="btn btn-warning text-dark">
+                Emergency Monitoring
+            </a>
+
+            <a href="{% url 'org_list' %}" class="btn btn-success">
+                Browse Listings
+            </a>
+
+            <a href="{% url 'logout' %}" class="btn btn-outline-dark">
+                Logout
+            </a>
+
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-4 mb-4">
+
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold text-danger mb-4">
+                    Emergency Priority Management
+                </h2>
+
+                <div class="row g-4">
+
+                    <div class="col-md-4">
+
+                        <div class="card border-0 shadow-sm h-100 bg-success-subtle">
+
+                            <div class="card-body">
+
+                                <h5 class="fw-bold text-success">
+                                    📊 Emergency Queue Overview
+                                </h5>
+
+                                <ul class="list-group list-group-flush">
+
+                                    <li class="list-group-item bg-transparent">
+                                        Total Emergency Requests:
+                                        <strong>{{ analytics.total_emergencies }}</strong>
+                                    </li>
+
+                                    <li class="list-group-item bg-transparent">
+                                        Approved:
+                                        <strong>{{ analytics.approved_requests }}</strong>
+                                        ({{ trends.approval_rate|floatformat:1 }}%)
+                                    </li>
+
+                                    <li class="list-group-item bg-transparent">
+                                        Rejected:
+                                        <strong>{{ analytics.rejected_requests }}</strong>
+                                        ({{ trends.rejection_rate|floatformat:1 }}%)
+                                    </li>
+
+                                </ul>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="card border-0 shadow-sm h-100 bg-info-subtle">
+
+                            <div class="card-body">
+
+                                <h5 class="fw-bold text-info">
+                                    📈 Submission Trends
+                                </h5>
+
+                                <ul class="list-group list-group-flush">
+
+                                    <li class="list-group-item bg-transparent">
+                                        Peak Request Day:
+                                        <strong>{{ trends.peak_day|default:"N/A" }}</strong>
+                                    </li>
+
+                                    <li class="list-group-item bg-transparent">
+                                        Peak Request Hour:
+                                        <strong>
+                                            {% if trends.peak_hour is not None %}
+                                                {{ trends.peak_hour }}:00
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </strong>
+                                    </li>
+
+                                </ul>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="card border-0 shadow-sm h-100 bg-warning-subtle">
+
+                            <div class="card-body">
+
+                                <h5 class="fw-bold text-warning">
+                                    🗂️ Emergency Type Breakdown
+                                </h5>
+
+                                <ul class="list-group list-group-flush">
+
+                                    {% for item in trends.type_breakdown %}
+
+                                        <li class="list-group-item bg-transparent">
+                                            {{ item.emergency_type }}:
+                                            <strong>{{ item.count }}</strong>
+                                        </li>
+
+                                    {% empty %}
+
+                                        <li class="list-group-item bg-transparent">
+                                            No type trends recorded yet.
+                                        </li>
+
+                                    {% endfor %}
+
+                                </ul>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-4 mb-4">
+
+            <div class="card-body p-4">
+
+                <h3 class="fw-bold text-primary mb-4">
+                    Active Priority Queue Flow
+                </h3>
+
+                {% if active_prios %}
+
+                    <p class="text-muted">
+                        You can manually adjust the dynamic insertion position of waiting priority tokens below.
+                    </p>
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th>Priority Serial</th>
+                                    <th>Token Serial</th>
+                                    <th>User</th>
+                                    <th>Urgency Level</th>
+                                    <th>Current Position</th>
+                                    <th>Adjust Position</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {% for p in active_prios %}
+
+                                <tr>
+
+                                    <td class="fw-bold">
+                                        {{ p.priority_serial }}
+                                    </td>
+
+                                    <td>
+                                        {{ p.token.serial_number }}
+                                    </td>
+
+                                    <td>
+                                        {{ p.token.user.username }}
+                                    </td>
+
+                                    <td>
+
+                                        <span class="badge bg-danger">
+                                            {{ p.urgency_level }}
+                                        </span>
+
+                                    </td>
+
+                                    <td class="fw-bold">
+                                        Position {{ p.insertion_position }}
+                                    </td>
+
+                                    <td>
+
+                                        <form action="{% url 'adjust_priority_position' p.id %}"
+                                              method="POST"
+                                              class="d-flex gap-2 align-items-center">
+
+                                            {% csrf_token %}
+
+                                            <input type="number"
+                                                   id="pos-{{ p.id }}"
+                                                   name="new_position"
+                                                   min="1"
+                                                   max="{{ total_waiting_count }}"
+                                                   value="{{ p.insertion_position }}"
+                                                   class="form-control"
+                                                   style="width: 100px;">
+
+                                            <button type="submit"
+                                                    class="btn btn-info text-white">
+
+                                                Set Position
+
+                                            </button>
+
+                                        </form>
+
+                                    </td>
+
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="alert alert-warning mb-0">
+                        No active waiting priority tokens currently in queue today.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-4">
+
+            <div class="card-body p-4">
+
+                <h3 class="fw-bold text-primary mb-4">
+                    Active & Historical Requests
+                </h3>
+
+                {% if requests %}
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th>Date & Time</th>
+                                    <th>Token</th>
+                                    <th>User</th>
+                                    <th>Emergency Type</th>
+                                    <th>Uploaded Document</th>
+                                    <th>Risk Assessment</th>
+                                    <th>Current Status</th>
+                                    <th>Actions</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {% for item in requests %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ item.req.created_at|date:"M d, Y h:i A" }}
+                                    </td>
+
+                                    <td class="fw-bold">
+                                        {{ item.req.token.serial_number }}
+                                    </td>
+
+                                    <td>
+                                        {{ item.req.token.user.username }}
+                                    </td>
+
+                                    <td>
+                                        {{ item.req.emergency_type }}
+                                    </td>
+
+                                    <td>
+
+                                        {% if item.req.document %}
+
+                                            <a href="{{ item.req.document.url }}"
+                                               target="_blank"
+                                               class="btn btn-outline-primary btn-sm">
+
+                                                View Document
+
+                                            </a>
+
+                                        {% else %}
+
+                                            <span class="text-danger fw-bold">
+                                                No Document Provided
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>
+
+                                        {% if item.is_suspicious %}
+
+                                            <div class="alert alert-danger py-2 mb-0">
+
+                                                <strong>
+                                                    ⚠️ Potential Abuse
+                                                </strong>
+
+                                                <ul class="mb-0 mt-2">
+
+                                                    {% for reason in item.reasons %}
+
+                                                        <li>{{ reason }}</li>
+
+                                                    {% endfor %}
+
+                                                </ul>
+
+                                            </div>
+
+                                        {% else %}
+
+                                            <span class="badge bg-success">
+                                                ✓ Low Risk
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>
+
+                                        {% if item.req.status == 'Pending' %}
+
+                                            <span class="badge bg-warning text-dark">
+                                                {{ item.req.status }}
+                                            </span>
+
+                                        {% elif item.req.status == 'Approved' %}
+
+                                            <span class="badge bg-success">
+                                                {{ item.req.status }}
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="badge bg-danger">
+                                                {{ item.req.status }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>
+
+                                        {% if item.req.status == 'Pending' %}
+
+                                            <div class="d-flex gap-2">
+
+                                                <form action="{% url 'approve_emergency' item.req.id %}"
+                                                      method="POST">
+
+                                                    {% csrf_token %}
+
+                                                    <button type="submit"
+                                                            class="btn btn-success btn-sm">
+
+                                                        Approve & Bump
+
+                                                    </button>
+
+                                                </form>
+
+                                                <form action="{% url 'reject_emergency' item.req.id %}"
+                                                      method="POST">
+
+                                                    {% csrf_token %}
+
+                                                    <button type="submit"
+                                                            class="btn btn-danger btn-sm">
+
+                                                        Reject
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+                                                None
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="alert alert-warning mb-0">
+                        No emergency priority requests submitted yet for your organization.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <footer class="text-center text-muted mt-5">
+            <p class="mb-0">
+                © 2026 QeNova. All rights reserved.
+            </p>
+        </footer>
+
+    </div>
+
+</body>
+</html>

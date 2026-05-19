@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queue Insights & Reports - QeNova</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+
+        <div class="container-fluid px-4">
+
+            <a class="navbar-brand fw-bold" href="#">
+                QeNova Queue Insights
+            </a>
+
+            <div class="text-white">
+
+                <strong>
+                    {{ organization.account.organization_name }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    <div class="container-fluid py-4 px-4">
+
+        <div class="d-flex flex-wrap gap-2 mb-4">
+
+            <a href="{% url 'org_dashboard' %}" class="btn btn-primary">
+                Back to Dashboard
+            </a>
+
+            <a href="{% url 'org_reports' %}" class="btn btn-success">
+                Daily Report Archive
+            </a>
+
+        </div>
+
+        <form method="get" class="mb-4">
+
+            <div class="card shadow-sm border-0 rounded-4">
+
+                <div class="card-body d-flex align-items-center gap-3 flex-wrap">
+
+                    <label class="fw-semibold">
+                        Analysis Period
+                    </label>
+
+                    <select name="days"
+                            onchange="this.form.submit()"
+                            class="form-select"
+                            style="width: 220px;">
+
+                        <option value="7" {% if days == 7 %}selected{% endif %}>
+                            Last 7 days
+                        </option>
+
+                        <option value="14" {% if days == 14 %}selected{% endif %}>
+                            Last 14 days
+                        </option>
+
+                        <option value="30" {% if days == 30 %}selected{% endif %}>
+                            Last 30 days
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </form>
+
+        <div class="card shadow-lg border-0 rounded-4 mb-4 bg-success-subtle">
+
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold text-success mb-4">
+                    Queue Health Monitor
+                </h2>
+
+                {% with health=insights.queue_health %}
+
+                <div class="row g-4 mb-4">
+
+                    <div class="col-md-4">
+
+                        <div class="card border-0 shadow-sm h-100">
+
+                            <div class="card-body text-center">
+
+                                <h6 class="fw-bold">
+                                    Queue Status
+                                </h6>
+
+                                {% if health.health_status == 'Critical' %}
+
+                                    <span class="badge bg-danger fs-6 px-3 py-2">
+                                        {{ health.health_status }}
+                                    </span>
+
+                                {% elif health.health_status == 'Congested' %}
+
+                                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                        {{ health.health_status }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-success fs-6 px-3 py-2">
+                                        {{ health.health_status }}
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="card border-0 shadow-sm h-100">
+
+                            <div class="card-body text-center">
+
+                                <h6 class="fw-bold">
+                                    Queue Flow
+                                </h6>
+
+                                <h4 class="fw-bold text-primary">
+                                    {{ health.flow_health }}
+                                </h4>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="card border-0 shadow-sm h-100">
+
+                            <div class="card-body text-center">
+
+                                <h6 class="fw-bold">
+                                    Queue Mode
+                                </h6>
+
+                                <h4 class="fw-bold text-dark">
+                                    {{ health.queue_status }}
+                                </h4>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="row g-4 mb-4">
+
+                    <div class="col-md-3">
+
+                        <div class="card border-0 bg-light shadow-sm">
+
+                            <div class="card-body text-center">
+
+                                <h6 class="fw-bold">
+                                    Waiting
+                                </h6>
+
+                                <h3 class="fw-bold text-warning">
+                                    {{ health.waiting_count }}
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <div class="card border-0 bg-light shadow-sm">
+
+                            <div class="card-body text-center">
+
+                                <h6 class="fw-bold">
+                                    Serving
+                                </h6>
+
+                                <h3 class="fw-bold text-primary">
+                                    {{ health.flow_breakdown.serving }}
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <div class="card border-0 bg-light shadow-sm">
+
+                            <div class="card-body text-center">
+
+                                <h6 class="fw-bold">
+                                    Completed
+                                </h6>
+
+                                <h3 class="fw-bold text-success">
+                                    {{ health.flow_breakdown.completed }}
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <div class="card border-0 bg-light shadow-sm">
+
+                            <div class="card-body text-center">
+
+                                <h6 class="fw-bold">
+                                    Skipped
+                                </h6>
+
+                                <h3 class="fw-bold text-danger">
+                                    {{ health.flow_breakdown.skipped }}
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% if health.serving_token %}
+
+                    <div class="alert alert-primary shadow-sm">
+
+                        Now serving:
+                        <strong>{{ health.serving_token }}</strong>
+
+                        ({{ health.serving_user }})
+
+                    </div>
+
+                {% endif %}
+
+                {% if health.alerts %}
+
+                    {% for alert in health.alerts %}
+
+                        <div class="alert alert-danger shadow-sm">
+                            {{ alert }}
+                        </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="alert alert-success shadow-sm mb-0">
+                        No health alerts at this time.
+                    </div>
+
+                {% endif %}
+
+                {% endwith %}
+
+            </div>
+
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-4 mb-4 bg-primary-subtle">
+
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold text-primary mb-4">
+                    Queue Insights
+                </h2>
+
+                <div class="row g-4 mb-4">
+
+                    <div class="col-md-4">
+
+                        <div class="card border-0 shadow-sm h-100">
+
+                            <div class="card-body text-center">
+
+                                <h6 class="fw-bold">
+                                    Efficiency Rating
+                                </h6>
+
+                                {% if insights.efficiency_rating == 'High' %}
+
+                                    <span class="badge bg-success fs-5 px-3 py-2">
+                                        {{ insights.efficiency_rating }}
+                                    </span>
+
+                                {% elif insights.efficiency_rating == 'Medium' %}
+
+                                    <span class="badge bg-warning text-dark fs-5 px-3 py-2">
+                                        {{ insights.efficiency_rating }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-danger fs-5 px-3 py-2">
+                                        {{ insights.efficiency_rating }}
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="card border-0 shadow-sm h-100">
+
+                            <div class="card-body text-center">
+
+                                <h6 class="fw-bold">
+                                    Service Speed
+                                </h6>
+
+                                <h3 class="fw-bold text-primary">
+                                    {{ insights.performance.queue_speed_tokens_per_hour }}
+                                </h3>
+
+                                <p class="text-muted mb-0">
+                                    tokens/hr
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="card border-0 shadow-sm h-100">
+
+                            <div class="card-body text-center">
+
+                                <h6 class="fw-bold">
+                                    Avg Service Time
+                                </h6>
+
+                                <h3 class="fw-bold text-success">
+                                    {{ insights.performance.avg_service_time_minutes }}
+                                </h3>
+
+                                <p class="text-muted mb-0">
+                                    minutes
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <h4 class="fw-bold mb-3">
+                    Recommendations
+                </h4>
+
+                <ul class="list-group mb-4">
+
+                    {% for tip in insights.recommendations %}
+
+                        <li class="list-group-item">
+                            {{ tip }}
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+
+                {% if insights.performance.performance_alerts %}
+
+                    <h4 class="fw-bold mb-3">
+                        Performance Alerts
+                    </h4>
+
+                    {% for alert in insights.performance.performance_alerts %}
+
+                        <div class="alert alert-danger shadow-sm">
+                            {{ alert }}
+                        </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-4 mb-4">
+
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold text-primary mb-4">
+                    Queue Traffic ({{ insights.traffic.days_analyzed }} Days)
+                </h2>
+
+                <div class="mb-4">
+
+                    <p>
+
+                        Total bookings:
+                        <strong>{{ insights.traffic.total_bookings_period }}</strong>
+
+                    </p>
+
+                    {% if insights.traffic.peak_day %}
+
+                        <p>
+
+                            Busiest day:
+                            <strong>{{ insights.traffic.peak_day.date }}</strong>
+
+                            ({{ insights.traffic.peak_day.total }} tokens)
+
+                        </p>
+
+                    {% endif %}
+
+                    {% if insights.traffic.peak_hour_today %}
+
+                        <p>
+
+                            Peak hour today:
+                            <strong>{{ insights.traffic.peak_hour_today.hour }}:00</strong>
+
+                            ({{ insights.traffic.peak_hour_today.count }} bookings)
+
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Completed</th>
+                                <th>Skipped</th>
+                                <th>Waiting</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for row in insights.traffic.daily_traffic %}
+
+                            <tr>
+
+                                <td>{{ row.date }}</td>
+                                <td>{{ row.total }}</td>
+                                <td>{{ row.completed }}</td>
+                                <td>{{ row.skipped }}</td>
+                                <td>{{ row.waiting }}</td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-4 mb-4">
+
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold text-success mb-4">
+                    Completion Trends
+                </h2>
+
+                <div class="mb-4">
+
+                    <p>
+
+                        Average completion rate:
+                        <strong>{{ insights.completion_trends.average_completion_rate }}%</strong>
+
+                    </p>
+
+                    <p>
+
+                        Trend:
+                        <strong>{{ insights.completion_trends.trend_direction }}</strong>
+
+                    </p>
+
+                </div>
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Completed</th>
+                                <th>Skipped</th>
+                                <th>Completion %</th>
+                                <th>Skip %</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for row in insights.completion_trends.trends %}
+
+                            <tr>
+
+                                <td>{{ row.date }}</td>
+                                <td>{{ row.total }}</td>
+                                <td>{{ row.completed }}</td>
+                                <td>{{ row.skipped }}</td>
+                                <td>{{ row.completion_rate }}%</td>
+                                <td>{{ row.skip_rate }}%</td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-4 mb-4">
+
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold text-danger mb-4">
+                    Behavioral Reports
+                </h2>
+
+                <p class="text-muted">
+                    Generated via <code>generateBehaviorReport()</code> for each customer.
+                </p>
+
+                {% if behavioral_reports %}
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th>Customer</th>
+                                    <th>Reliability</th>
+                                    <th>Status</th>
+                                    <th>No-shows</th>
+                                    <th>Late</th>
+                                    <th>Cancellations</th>
+                                    <th>Flags</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {% for br in behavioral_reports %}
+
+                                <tr class="{% if br.is_blacklisted %}table-danger{% elif br.is_flagged_for_abuse %}table-warning{% endif %}">
+
+                                    <td>{{ br.username }}</td>
+                                    <td><strong>{{ br.reliability_score }}</strong></td>
+                                    <td>{{ br.status }}</td>
+                                    <td>{{ br.total_no_shows }}</td>
+                                    <td>{{ br.total_late_arrivals }}</td>
+                                    <td>{{ br.total_cancellations }}</td>
+
+                                    <td>
+
+                                        {% if br.flags %}
+
+                                            {{ br.flags|join:", " }}
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="alert alert-warning mb-0">
+                        No customer behavior data yet.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-4">
+
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold text-dark mb-4">
+                    Recent Daily Reports
+                </h2>
+
+                <p class="text-muted">
+                    Efficiency from <code>monitorQueueEfficiency()</code> stored daily.
+                </p>
+
+                {% if reports %}
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th>Date</th>
+                                    <th>Efficiency</th>
+                                    <th>Tokens</th>
+                                    <th>Completed</th>
+                                    <th>Skipped</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {% for report in reports %}
+
+                                <tr>
+
+                                    <td>{{ report.report_date|date:"Y-m-d" }}</td>
+
+                                    <td>
+
+                                        {% if report.efficiency_rating == 'High' %}
+
+                                            <span class="badge bg-success">
+                                                {{ report.efficiency_rating }}
+                                            </span>
+
+                                        {% elif report.efficiency_rating == 'Medium' %}
+
+                                            <span class="badge bg-warning text-dark">
+                                                {{ report.efficiency_rating }}
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="badge bg-danger">
+                                                {{ report.efficiency_rating }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>{{ report.stats.total_tokens|default:0 }}</td>
+                                    <td>{{ report.stats.completed_count|default:0 }}</td>
+                                    <td>{{ report.stats.skipped_count|default:0 }}</td>
+
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="alert alert-warning mb-0">
+                        No archived reports yet.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

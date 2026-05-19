@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Dashboard - QeNova</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+
+        <div class="container-fluid px-4">
+
+            <a class="navbar-brand fw-bold" href="#">
+                QeNova
+            </a>
+
+            <div class="text-white">
+
+                Logged in as:
+                <strong>{{ user.username }}</strong>
+
+                ({{ user.organization_profile.organization_name }})
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    <div class="container-fluid py-4 px-4">
+
+        <div class="d-flex flex-wrap gap-2 mb-4">
+
+            <a href="{% url 'profile' %}" class="btn btn-primary">
+                Edit Profile
+            </a>
+
+            <a href="{% url 'analytics' organization.account.id %}" class="btn btn-success">
+                View Analytics
+            </a>
+
+            <a href="{% url 'org_queue_insights' %}" class="btn btn-info text-white">
+                Queue Insights & Reports
+            </a>
+
+            <a href="{% url 'org_notification_center' %}" class="btn btn-warning text-dark">
+                Notification Center
+            </a>
+
+            <a href="{% url 'org_settings' %}" class="btn btn-secondary">
+                Organization Settings
+            </a>
+
+            <a href="{% url 'org_reports' %}" class="btn btn-dark">
+                Daily Report Archive
+            </a>
+
+            <a href="{% url 'org_emergencies' %}" class="btn btn-danger fw-bold">
+                Manage Emergencies
+            </a>
+
+            <a href="{% url 'org_emergency_monitoring' %}" class="btn btn-outline-danger">
+                Emergency Monitoring
+            </a>
+
+            <a href="{% url 'logout' %}" class="btn btn-outline-dark">
+                Logout
+            </a>
+
+        </div>
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="alert alert-info shadow-sm">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+        <div class="card shadow-lg border-0 rounded-4 mb-4">
+
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold text-primary mb-4">
+                    Queue Status Monitor & Real-Time Analytics
+                </h2>
+
+                <div class="row g-4">
+
+                    <div class="col-md-6 col-xl-3">
+
+                        <div class="card border-0 shadow-sm h-100">
+
+                            <div class="card-body">
+
+                                <h5 class="fw-bold">
+                                    Queue Health
+                                </h5>
+
+                                <h3 id="health-status-value"
+                                    class="{% if monitor_stats.health_status == 'Critical' %}text-danger{% elif monitor_stats.health_status == 'Congested' %}text-warning{% else %}text-success{% endif %}">
+
+                                    {{ monitor_stats.health_status }}
+
+                                </h3>
+
+                                <p class="text-muted mb-0">
+                                    Flow: {{ flow_stats.health }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6 col-xl-3">
+
+                        <div class="card border-0 shadow-sm h-100">
+
+                            <div class="card-body">
+
+                                <h5 class="fw-bold">
+                                    Total Unique Users
+                                </h5>
+
+                                <h2 class="text-primary fw-bold">
+                                    {{ gen_stats.total_users }}
+                                </h2>
+
+                                <p class="text-muted mb-0">
+                                    All-time Bookings: {{ gen_stats.total_bookings }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6 col-xl-3">
+
+                        <div class="card border-0 shadow-sm h-100">
+
+                            <div class="card-body">
+
+                                <h5 class="fw-bold mb-3">
+                                    Daily Token Tracker
+                                </h5>
+
+                                <div class="d-flex flex-column gap-2">
+
+                                    <span id="stat-waiting" class="badge bg-primary p-2">
+                                        Waiting: {{ gen_stats.status_distribution.Waiting }}
+                                    </span>
+
+                                    <span id="stat-serving" class="badge bg-success p-2">
+                                        Serving: {{ gen_stats.status_distribution.Serving }}
+                                    </span>
+
+                                    <span id="stat-completed" class="badge bg-dark p-2">
+                                        Completed: {{ gen_stats.status_distribution.Completed }}
+                                    </span>
+
+                                    <span id="stat-skipped" class="badge bg-warning text-dark p-2">
+                                        Skipped: {{ gen_stats.status_distribution.Skipped }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6 col-xl-3">
+
+                        <div class="card border-0 shadow-sm h-100">
+
+                            <div class="card-body">
+
+                                <h5 class="fw-bold">
+                                    Performance & Alerts
+                                </h5>
+
+                                <p>
+                                    Speed:
+                                    <strong>
+                                        {{ performance.queue_speed_tokens_per_hour|default:0 }}
+                                    </strong>
+                                    tokens/hr
+                                </p>
+
+                                {% if performance.performance_alerts %}
+
+                                    {% for alert in performance.performance_alerts %}
+
+                                        <div class="alert alert-danger py-2">
+                                            ⚠️ {{ alert }}
+                                        </div>
+
+                                    {% endfor %}
+
+                                {% else %}
+
+                                    <div class="alert alert-success py-2 mb-0">
+                                        ✓ Service performance is optimal.
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <hr class="my-4">
+
+                <div class="row g-4">
+
+                    <div class="col-md-4">
+
+                        <div class="card border-0 bg-light">
+
+                            <div class="card-body">
+
+                                <h6 class="fw-bold">
+                                    Queue Status
+                                </h6>
+
+                                <p id="queue-status-value" class="mb-0">
+                                    {{ flow_stats.queue_status }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="card border-0 bg-light">
+
+                            <div class="card-body">
+
+                                <h6 class="fw-bold">
+                                    Daily Token Limit
+                                </h6>
+
+                                <p class="mb-0">
+                                    {{ capacity.token_limit }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="card border-0 bg-light">
+
+                            <div class="card-body">
+
+                                <h6 class="fw-bold">
+                                    Remaining Slots
+                                </h6>
+
+                                <p class="mb-0">
+
+                                    {{ capacity.remaining }}
+
+                                    {% if capacity.is_full %}
+
+                                        <span class="badge bg-danger">
+                                            QUEUE FULL
+                                        </span>
+
+                                    {% endif %}
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+
+                    <h5 class="fw-bold">
+                        Current Token Being Served
+                    </h5>
+
+                    <div id="serving-token-display">
+
+                        {% if tracker.current_token %}
+
+                            <span class="badge bg-success fs-6 p-3">
+
+                                {{ tracker.current_token.serial_number }}
+
+                                ({{ tracker.current_token.user.username }})
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="text-muted">
+                                None
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-4 mb-4">
+
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold text-primary mb-4">
+                    Queue Controls
+                </h2>
+
+                <div class="d-flex flex-wrap gap-3">
+
+                    <form method="post" action="{% url 'call_next_token' %}">
+                        {% csrf_token %}
+
+                        <button type="submit" class="btn btn-success">
+                            Call Next Token
+                        </button>
+
+                    </form>
+
+                    <form method="post" action="{% url 'skip_token' %}">
+                        {% csrf_token %}
+
+                        <button type="submit" class="btn btn-warning">
+                            Skip Current Token
+                        </button>
+
+                    </form>
+
+                    <a href="{% url 'org_settings' %}" class="btn btn-secondary">
+                        Queue Status & Limits
+                    </a>
+
+                    <form method="post"
+                          action="{% url 'reset_queue' %}"
+                          onsubmit="return confirm('WARNING: This will expire ALL remaining tokens and reset the queue from scratch. Are you sure?');">
+
+                        {% csrf_token %}
+
+                        <button type="submit" class="btn btn-danger">
+                            Reset Daily Queue
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-4 mb-4">
+
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold text-primary mb-4">
+                    Waiting Queue (Today)
+                </h2>
+
+                <div id="waiting-list-wrapper">
+
+                    {% if waiting_tokens %}
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover align-middle">
+
+                                <thead class="table-light">
+
+                                    <tr>
+
+                                        <th>Token</th>
+                                        <th>Customer</th>
+                                        <th>Booked At</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    {% for token in waiting_tokens %}
+
+                                    <tr>
+
+                                        <td>
+                                            {{ token.serial_number }}
+                                        </td>
+
+                                        <td>
+                                            {{ token.user.username }}
+                                        </td>
+
+                                        <td>
+                                            {{ token.booking.created_at|default:"—" }}
+                                        </td>
+
+                                        <td>
+
+                                            <span class="badge bg-primary">
+                                                {{ token.status }}
+                                            </span>
+
+                                        </td>
+
+                                        <td>
+
+                                            <form method="post"
+                                                  action="{% url 'skip_token_by_id' token.id %}">
+
+                                                {% csrf_token %}
+
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    Skip
+                                                </button>
+
+                                            </form>
+
+                                        </td>
+
+                                    </tr>
+
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="alert alert-warning mb-0">
+                            No customers are waiting in the queue right now.
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-4">
+
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold text-primary mb-4">
+                    Profile Information
+                </h2>
+
+                <div class="row g-4 align-items-center">
+
+                    <div class="col-md-3 text-center">
+
+                        {% if user.organization_profile.logo %}
+
+                            <img src="{{ user.organization_profile.logo.url }}"
+                                 alt="Logo"
+                                 width="120"
+                                 height="120"
+                                 class="rounded-circle shadow border border-3 border-primary">
+
+                        {% else %}
+
+                            <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center text-white fw-bold shadow"
+                                 style="width: 120px; height: 120px; font-size: 35px;">
+
+                                {{ user.organization_profile.organization_name|first|upper }}
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    <div class="col-md-9">
+
+                        <p>
+                            <strong>Name:</strong>
+                            {{ user.organization_profile.organization_name }}
+                        </p>
+
+                        <p>
+                            <strong>Email:</strong>
+                            {{ user.email }}
+                        </p>
+
+                        <p class="mb-0">
+                            <strong>Working Hours:</strong>
+                            {{ user.organization_profile.working_hours|default:"Not set" }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
